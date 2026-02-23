@@ -16,11 +16,11 @@ namespace telecom
     void startSession(const Time & start);
     void endSession(const Time & end, int cost);
 
-    bool isBusy() const;
+    bool isFree() const;
 
   private:
     int num_;
-    bool busy_flag_;
+    bool free_flag_;
     int revenue_;
     Time start_;
     Time sum_time_;

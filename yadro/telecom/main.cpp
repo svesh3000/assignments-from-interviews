@@ -21,7 +21,7 @@ int main(int argc, char * argv[])
 
   try
   {
-    std::pair< ComputerClub, std::string > club_with_err = loadComputerClub(file);
+    std::pair< ComputerClub, std::string > club_with_err = processComputerClub(file);
     if (!club_with_err.second.empty())
     {
       std::cout << club_with_err.second << "\n";
