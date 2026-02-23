@@ -13,7 +13,7 @@ namespace telecom
   class ComputerClub
   {
   public:
-    ComputerClub(Time start, Time end, int cost);
+    ComputerClub(int num_tables, Time start, Time end, int cost);
 
     const Time & getStart() const;
     const Time & getEnd() const;
@@ -34,7 +34,7 @@ namespace telecom
 
     void addEvent(const Event & ev);
     void addClient(const std::string & client);
-    void seatClientAtTable(const std::string & client, int num);
+    void seatClientAtTable(const std::string & client, int num, const Time & t);
     bool isClientWait(const std::string & client);
     void removeClient(const std::string & client);
 

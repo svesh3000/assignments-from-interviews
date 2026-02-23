@@ -38,6 +38,31 @@ namespace
   }
 }
 
+telecom::Time telecom::operator+(const Time & lhs, const Time & rhs)
+{
+  int total_min = lhs.minutes_ + rhs.minutes_;
+  int hours = lhs.hours_ + rhs.hours_ + total_min / 60;
+  int min = total_min % 60;
+  return Time{hours, min};
+}
+
+telecom::Time telecom::countDuration(const Time & lhs, const Time & rhs)
+{
+  int lhs_total = lhs.hours_ * 60 + lhs.minutes_;
+  int rhs_total = rhs.hours_ * 60 + rhs.minutes_;
+  int diff = (lhs_total >= rhs_total) ? lhs_total - rhs_total : rhs_total - lhs_total;
+
+  int hours = diff / 60;
+  int min = diff % 60;
+
+  return Time{hours, min};
+}
+
+bool telecom::operator==(const Time & lhs, const Time & rhs)
+{
+  return lhs.hours_ == rhs.hours_ && lhs.minutes_ == rhs.minutes_;
+}
+
 std::istream & telecom::operator>>(std::istream & in, Time & t)
 {
   std::istream::sentry s(in);

@@ -4,11 +4,25 @@
 
 namespace telecom
 {
-  struct Table
+  class Table
   {
+  public:
+    explicit Table(int num);
+
+    int getNum() const;
+    int getRevenue() const;
+    const Time & getSumTime() const;
+
+    void startSession(const Time & start);
+    void endSession(const Time & end, int cost);
+
+    bool isBusy() const;
+
+  private:
     int num_;
+    bool busy_flag_;
     int revenue_;
-    Time last_start_;
+    Time start_;
     Time sum_time_;
   };
 }
