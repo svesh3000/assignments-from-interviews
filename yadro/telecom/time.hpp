@@ -6,8 +6,8 @@ namespace telecom
 {
   struct Time
   {
-    int hours;
-    int minutes;
+    int hours_;
+    int minutes_;
   };
 
   std::istream & operator>>(std::istream & in, Time & t);

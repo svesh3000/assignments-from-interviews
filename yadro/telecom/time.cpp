@@ -16,6 +16,12 @@ namespace
 
   std::istream & operator>>(std::istream & in, TwoDigits & td)
   {
+    std::istream::sentry s(in);
+    if (!s)
+    {
+      return in;
+    }
+
     char d1, d2;
     if (in >> d1 >> d2)
     {
@@ -47,8 +53,8 @@ std::istream & telecom::operator>>(std::istream & in, Time & t)
 
   if (in && del == ':' && hours.value <= 23 && minutes.value <= 59)
   {
-    t.hours = hours.value;
-    t.minutes = minutes.value;
+    t.hours_ = hours.value;
+    t.minutes_ = minutes.value;
   }
   else
   {
@@ -66,16 +72,16 @@ std::ostream & telecom::operator<<(std::ostream & out, const Time & t)
   }
   StreamGuard streamguard(out);
 
-  if (t.hours < 10)
+  if (t.hours_ < 10)
   {
     out << '0';
   }
-  out << t.hours << ':';
-  if (t.minutes < 10)
+  out << t.hours_ << ':';
+  if (t.minutes_ < 10)
   {
     out << '0';
   }
-  out << t.minutes;
+  out << t.minutes_;
 
   return out;
 }

@@ -4,13 +4,13 @@
 
 namespace telecom
 {
-  class Table
+  struct Table
   {
-    Time time;
+    int num_;
+    int revenue_;
+    Time last_start_;
+    Time sum_time_;
   };
-
-  std::istream & operator>>(std::istream & in, Table & t);
-  std::ostream & operator<<(std::ostream & out, const Table & t);
 }
 
 #endif
