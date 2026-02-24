@@ -1,7 +1,34 @@
 #include "event-handlers.hpp"
 
+#include <stdexcept>
+
+namespace
+{
+  void checkHasTableParam(const telecom::Event & event);
+  void checkHasErrParam(const telecom::Event & event);
+
+  void checkHasTableParam(const telecom::Event & event)
+  {
+    if (event.table_ != 0)
+    {
+      throw std::invalid_argument("Incorrect event data format");
+    }
+  }
+
+  void checkHasErrParam(const telecom::Event & event)
+  {
+    if (!event.err_.empty())
+    {
+      throw std::invalid_argument("Incorrect event data format");
+    }
+  }
+}
+
 void telecom::handleClientArrival(ComputerClub & club, const Event & event)
 {
+  checkHasTableParam(event);
+  checkHasErrParam(event);
+
   if (club.isClientInClub(event.name_))
   {
     club.addEvent(Event{event.time_, 13, "", 0, "YouShallNotPass"});
@@ -19,6 +46,8 @@ void telecom::handleClientArrival(ComputerClub & club, const Event & event)
 
 void telecom::handleClientSit(ComputerClub & club, const Event & event)
 {
+  checkHasErrParam(event);
+
   if (!club.isClientInClub(event.name_))
   {
     club.addEvent(Event{event.time_, 13, "", 0, "ClientUnknown"});
@@ -36,6 +65,14 @@ void telecom::handleClientSit(ComputerClub & club, const Event & event)
 
 void telecom::handleClientWait(ComputerClub & club, const Event & event)
 {
+  checkHasTableParam(event);
+  checkHasErrParam(event);
+
+  if (event.table_ != 0)
+  {
+    throw std::invalid_argument("Incorrect event data format in handleClientArrival");
+  }
+
   if (!club.isClientInClub(event.name_))
   {
     club.addEvent(Event{event.time_, 13, "", 0, "ClientUnknown"});
@@ -60,6 +97,14 @@ void telecom::handleClientWait(ComputerClub & club, const Event & event)
 
 void telecom::handleClientLeave(ComputerClub & club, const Event & event)
 {
+  checkHasTableParam(event);
+  checkHasErrParam(event);
+
+  if (event.table_ != 0)
+  {
+    throw std::invalid_argument("Incorrect event data format in handleClientArrival");
+  }
+
   if (!club.isClientInClub(event.name_))
   {
     club.addEvent(Event{event.time_, 13, "", 0, "ClientUnknown"});

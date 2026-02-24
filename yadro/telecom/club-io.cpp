@@ -1,5 +1,7 @@
 #include "club-io.hpp"
 
+#include <sstream>
+
 #include "event-handlers.hpp"
 
 namespace
@@ -8,8 +10,37 @@ namespace
   const std::unordered_map< int, Handler > handlers = {{1, telecom::handleClientArrival},
     {2, telecom::handleClientSit}, {3, telecom::handleClientWait}, {4, telecom::handleClientLeave}};
 
+  bool parseEventLine(const std::string & line, telecom::Event & ev, std::string & errorLine);
+
   std::ostream & printEvent(const telecom::Event & event, std::ostream & out);
   std::ostream & printTable(const telecom::Table & table, std::ostream & out);
+
+  bool parseEventLine(const std::string & line, telecom::Event & ev, std::string & errorLine)
+  {
+    std::istringstream iss(line);
+    if (!(iss >> ev.time_ >> ev.id_ >> ev.name_))
+    {
+      errorLine = line;
+      return false;
+    }
+    iss >> std::ws;
+    if (iss.peek() != EOF)
+    {
+      if (!(iss >> ev.table_))
+      {
+        errorLine = line;
+        return false;
+      }
+
+      iss >> std::ws;
+      if (iss.peek() != EOF)
+      {
+        errorLine = line;
+        return false;
+      }
+    }
+    return true;
+  }
 
   void processSingleEvent(telecom::ComputerClub & club, const telecom::Event & ev)
   {
@@ -42,6 +73,7 @@ namespace
     return out;
   }
 }
+
 std::ostream & telecom::printListEvents(const ComputerClub & comp_club, std::ostream & out)
 {
   const std::vector< Event > events = comp_club.getEvents();
