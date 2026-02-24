@@ -1,15 +1,15 @@
 # assignments-from-interviews
 This repository will contain the tasks offered at the interviews and their solutions.
 
-# First Task: Task from Yadro for an internship in telecom (test task on C++)
-## Компьютерный клуб (тестовое задание)
+## First Task: Task from Yadro for an internship in telecom (test task on C++)
+### Компьютерный клуб (тестовое задание)
 Данная программа моделирует работу компьютерного клуба согласно техническому заданию. Она читает входной файл, обрабатывает события и выводит отчёт.
 
-### Требования
+#### Требования
 - Компилятор с поддержкой C++17 (g++ или clang++)
 - Утилита `make`
 
-### Сборка программы
+#### Сборка программы
 1. Перейдите в корневую папку проекта (где лежит `Makefile`).
 2. Выполните команду:
    ```bash
@@ -17,7 +17,7 @@ This repository will contain the tasks offered at the interviews and their solut
    ```
    Будет создан исполняемый файл lab
 
-### Запуск программы
+#### Запуск программы
 Программа принимает один аргумент — путь к входному файлу с описанием работы клуба.
 Пример:
 
@@ -25,5 +25,5 @@ This repository will contain the tasks offered at the interviews and their solut
   ./lab tests/test1.txt
   ```
 
-### Тестовые примеры
+#### Тестовые примеры
 В папке tests находятся файлы с входными данными.
