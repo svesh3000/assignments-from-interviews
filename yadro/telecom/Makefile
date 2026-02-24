@@ -19,3 +19,15 @@ clean:
 	rm -rf $(BUILDDIR) $(TARGET)
 
 .PHONY: clean
+
+TEST_DIR = tests
+TEST_FILES = $(wildcard $(TEST_DIR)/*.txt)
+
+.PHONY: test
+test: $(TARGET)
+	@for file in $(TEST_FILES); do \
+		echo "=== $$(basename $$file) ==="; \
+		./$(TARGET) $$file; \
+		echo "Exit code: $$?"; \
+		echo; \
+	done
