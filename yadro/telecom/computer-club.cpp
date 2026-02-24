@@ -182,8 +182,9 @@ std::vector< std::pair< std::string, int > > telecom::ComputerClub::close()
   }
   std::sort(result.begin(), result.end());
 
-  for (const auto & [name, table] : result)
+  for (size_t i = 0; i < result.size(); ++i)
   {
+    int table = result[i].second;
     if (table != 0)
     {
       tables_[table - 1].endSession(end_, cost_);
