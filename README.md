@@ -10,7 +10,7 @@ This repository will contain the tasks offered at the interviews and their solut
 - Утилита `make`
 
 #### Сборка программы
-1. Перейдите в корневую папку проекта (где лежит `Makefile`).
+1. Перейдите в корневую папку проекта (yadro/telecom/).
 2. Выполните команду:
    ```bash
    make
