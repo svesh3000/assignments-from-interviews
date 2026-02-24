@@ -3,21 +3,13 @@
 #include <utility>
 #include <vector>
 
-#include "event-handlers.hpp"
 #include "event.hpp"
 #include "table.hpp"
 
 namespace
 {
-  using Handler = void (*)(telecom::ComputerClub &, const telecom::Event &);
-  const std::unordered_map< int, Handler > eventHandlers = {{1, telecom::handleClientArrival},
-    {2, telecom::handleClientSit}, {3, telecom::handleClientWait}, {4, telecom::handleClientLeave}};
-
   std::vector< telecom::Table > createTables(int num_tables);
   void checkTableNumber(int num);
-
-  std::ostream & printEvent(const telecom::Event & event, std::ostream & out);
-  std::ostream & printTable(const telecom::Table & table, std::ostream & out);
 
   std::vector< telecom::Table > createTables(int num_tables)
   {
@@ -38,28 +30,6 @@ namespace
     {
       throw std::out_of_range("Invalid table number");
     }
-  }
-
-  std::ostream & printEvent(const telecom::Event & event, std::ostream & out)
-  {
-    out << event.time_ << ' ' << event.id_ << ' ';
-    if (!event.err_.empty())
-    {
-      out << event.err_;
-      return out;
-    }
-    out << event.name_;
-    if (event.table_ != 0)
-    {
-      out << ' ' << event.table_;
-    }
-    return out;
-  }
-
-  std::ostream & printTable(const telecom::Table & table, std::ostream & out)
-  {
-    out << table.getNum() << ' ' << table.getRevenue() << ' ' << table.getSumTime();
-    return out;
   }
 }
 
@@ -91,6 +61,16 @@ const std::vector< telecom::Event > & telecom::ComputerClub::getEvents() const n
 const std::vector< telecom::Table > & telecom::ComputerClub::getTables() const noexcept
 {
   return tables_;
+}
+
+size_t telecom::ComputerClub::getNumTables() const noexcept
+{
+  return tables_.size();
+}
+
+size_t telecom::ComputerClub::getNumClientsInQueue() const noexcept
+{
+  return waiting_queue_.size();
 }
 
 void telecom::ComputerClub::addEvent(const Event & ev)
@@ -214,47 +194,4 @@ void telecom::ComputerClub::close()
   {
     waiting_queue_.pop();
   }
-}
-
-void telecom::ComputerClub::processEvent(const Event & ev)
-{
-  auto it = eventHandlers.find(ev.id_);
-  if (it != eventHandlers.end())
-  {
-    it->second(*this, ev);
-  }
-}
-
-std::ostream & telecom::printListEvents(const ComputerClub & comp_club, std::ostream & out)
-{
-  const std::vector< Event > events = comp_club.getEvents();
-
-  if (!events.empty())
-  {
-    printEvent(events[0], out);
-    for (size_t i = 1; i < events.size(); i++)
-    {
-      out << '\n';
-      printEvent(events[i], out);
-    }
-  }
-
-  return out;
-}
-
-std::ostream & telecom::printListTables(const ComputerClub & comp_club, std::ostream & out)
-{
-  const std::vector< Table > tables = comp_club.getTables();
-
-  if (!tables.empty())
-  {
-    printTable(tables[0], out);
-    for (size_t i = 1; i < tables.size(); i++)
-    {
-      out << '\n';
-      printTable(tables[i], out);
-    }
-  }
-
-  return out;
 }

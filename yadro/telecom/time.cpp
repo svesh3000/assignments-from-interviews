@@ -64,6 +64,16 @@ telecom::Time telecom::countDuration(const Time & start, const Time & end)
   return Time{hours, minutes};
 }
 
+bool telecom::operator==(const Time & lhs, const Time & rhs)
+{
+  return (lhs.hours_ == rhs.hours_) && (lhs.minutes_ == rhs.minutes_);
+}
+
+bool telecom::operator!=(const Time & lhs, const Time & rhs)
+{
+  return (lhs.hours_ != rhs.hours_) || (lhs.minutes_ != rhs.minutes_);
+}
+
 bool telecom::operator>(const Time & lhs, const Time & rhs)
 {
   return (lhs.hours_ > rhs.hours_) || (lhs.hours_ == rhs.hours_ && lhs.minutes_ > rhs.minutes_);
@@ -72,6 +82,16 @@ bool telecom::operator>(const Time & lhs, const Time & rhs)
 bool telecom::operator<(const Time & lhs, const Time & rhs)
 {
   return (lhs.hours_ < rhs.hours_) || (lhs.hours_ == rhs.hours_ && lhs.minutes_ < rhs.minutes_);
+}
+
+bool telecom::operator>=(const Time & lhs, const Time & rhs)
+{
+  return (lhs > rhs) || (lhs == rhs);
+}
+
+bool telecom::operator<=(const Time & lhs, const Time & rhs)
+{
+  return (lhs < rhs) || (lhs == rhs);
 }
 
 std::istream & telecom::operator>>(std::istream & in, Time & t)
@@ -112,12 +132,8 @@ std::ostream & telecom::operator<<(std::ostream & out, const Time & t)
   {
     out << '0';
   }
-  int hours = t.hours_;
-  if (hours > 23)
-  {
-    hours %= 24;
-  }
-  out << hours << ':';
+
+  out << t.hours_ << ':';
   if (t.minutes_ < 10)
   {
     out << '0';
