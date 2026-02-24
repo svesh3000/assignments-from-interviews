@@ -31,3 +31,9 @@ This repository will contain the tasks offered at the interviews and their solut
 
 #### Тестовые примеры
 В папке tests находятся файлы с входными данными.
+
+#### Сборка и запуск всех тестов из папки tests
+Выполните команду:
+   ```bash
+   make test
+   ```
