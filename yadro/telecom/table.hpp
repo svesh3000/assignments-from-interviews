@@ -9,14 +9,14 @@ namespace telecom
   public:
     explicit Table(int num);
 
-    int getNum() const;
-    int getRevenue() const;
-    const Time & getSumTime() const;
+    int getNum() const noexcept;
+    int getRevenue() const noexcept;
+    const Time & getSumTime() const noexcept;
 
     void startSession(const Time & start);
-    void endSession(const Time & end, int cost);
+    void endSession(const Time & end, int cost) noexcept;
 
-    bool isFree() const;
+    bool isFree() const noexcept;
 
   private:
     int num_;

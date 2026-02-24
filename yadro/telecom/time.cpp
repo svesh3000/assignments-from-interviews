@@ -46,21 +46,32 @@ telecom::Time telecom::operator+(const Time & lhs, const Time & rhs)
   return Time{hours, min};
 }
 
-telecom::Time telecom::countDuration(const Time & lhs, const Time & rhs)
+telecom::Time telecom::countDuration(const Time & start, const Time & end)
 {
-  int lhs_total = lhs.hours_ * 60 + lhs.minutes_;
-  int rhs_total = rhs.hours_ * 60 + rhs.minutes_;
-  int diff = (lhs_total >= rhs_total) ? lhs_total - rhs_total : rhs_total - lhs_total;
-
+  int start_min = start.hours_ * 60 + start.minutes_;
+  int end_min = end.hours_ * 60 + end.minutes_;
+  int diff;
+  if (end_min >= start_min)
+  {
+    diff = end_min - start_min;
+  }
+  else
+  {
+    diff = (24 * 60 - start_min) + end_min;
+  }
   int hours = diff / 60;
-  int min = diff % 60;
-
-  return Time{hours, min};
+  int minutes = diff % 60;
+  return Time{hours, minutes};
 }
 
-bool telecom::operator==(const Time & lhs, const Time & rhs)
+bool telecom::operator>(const Time & lhs, const Time & rhs)
 {
-  return lhs.hours_ == rhs.hours_ && lhs.minutes_ == rhs.minutes_;
+  return (lhs.hours_ > rhs.hours_) || (lhs.hours_ == rhs.hours_ && lhs.minutes_ > rhs.minutes_);
+}
+
+bool telecom::operator<(const Time & lhs, const Time & rhs)
+{
+  return (lhs.hours_ < rhs.hours_) || (lhs.hours_ == rhs.hours_ && lhs.minutes_ < rhs.minutes_);
 }
 
 std::istream & telecom::operator>>(std::istream & in, Time & t)
@@ -101,7 +112,12 @@ std::ostream & telecom::operator<<(std::ostream & out, const Time & t)
   {
     out << '0';
   }
-  out << t.hours_ << ':';
+  int hours = t.hours_;
+  if (hours > 23)
+  {
+    hours %= 24;
+  }
+  out << hours << ':';
   if (t.minutes_ < 10)
   {
     out << '0';

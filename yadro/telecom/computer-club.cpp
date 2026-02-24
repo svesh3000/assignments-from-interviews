@@ -14,6 +14,7 @@ namespace
     {2, telecom::handleClientSit}, {3, telecom::handleClientWait}, {4, telecom::handleClientLeave}};
 
   std::vector< telecom::Table > createTables(int num_tables);
+  void checkTableNumber(int num);
 
   std::ostream & printEvent(const telecom::Event & event, std::ostream & out);
   std::ostream & printTable(const telecom::Table & table, std::ostream & out);
@@ -29,6 +30,14 @@ namespace
       tables.emplace_back(i);
     }
     return tables;
+  }
+
+  void checkTableNumber(int num, int max_num)
+  {
+    if (num < 1 || num > max_num)
+    {
+      throw std::out_of_range("Invalid table number");
+    }
   }
 
   std::ostream & printEvent(const telecom::Event & event, std::ostream & out)
@@ -61,25 +70,25 @@ telecom::ComputerClub::ComputerClub(int num_tables, Time start, Time end, int co
   tables_(createTables(num_tables)),
   clients_(),
   events_(),
-  waitig_queue_()
+  waiting_queue_()
 {}
 
-const telecom::Time & telecom::ComputerClub::getStart() const
+const telecom::Time & telecom::ComputerClub::getStart() const noexcept
 {
   return start_;
 }
 
-const telecom::Time & telecom::ComputerClub::getEnd() const
+const telecom::Time & telecom::ComputerClub::getEnd() const noexcept
 {
   return end_;
 }
 
-const std::vector< telecom::Event > & telecom::ComputerClub::getEvents() const
+const std::vector< telecom::Event > & telecom::ComputerClub::getEvents() const noexcept
 {
   return events_;
 }
 
-const std::vector< telecom::Table > & telecom::ComputerClub::getTables() const
+const std::vector< telecom::Table > & telecom::ComputerClub::getTables() const noexcept
 {
   return tables_;
 }
@@ -94,17 +103,18 @@ void telecom::ComputerClub::addClient(const std::string & client)
   clients_.emplace(client, 0);
 }
 
-bool telecom::ComputerClub::isClientInClub(const std::string & client) const
+bool telecom::ComputerClub::isClientInClub(const std::string & client) const noexcept
 {
   return clients_.find(client) != clients_.end();
 }
 
 bool telecom::ComputerClub::isTableFree(int num) const
 {
+  checkTableNumber(num, static_cast< int >(tables_.size()));
   return tables_[num - 1].isFree();
 }
 
-int telecom::ComputerClub::getFreeTableNumber() const
+int telecom::ComputerClub::getFreeTableNumber() const noexcept
 {
   for (int i = 0; i < tables_.size(); i++)
   {
@@ -118,6 +128,8 @@ int telecom::ComputerClub::getFreeTableNumber() const
 
 void telecom::ComputerClub::seatClientAtTable(const std::string & client, int num, const Time & t)
 {
+  checkTableNumber(num, static_cast< int >(tables_.size()));
+
   auto it = clients_.find(client);
   if (it == clients_.end())
   {
@@ -135,17 +147,19 @@ void telecom::ComputerClub::seatClientAtTable(const std::string & client, int nu
 
 void telecom::ComputerClub::addToQueue(const std::string & client)
 {
-  waitig_queue_.push(client);
+  waiting_queue_.push(client);
 }
 
 void telecom::ComputerClub::moveFromQueueToTable(int num, const Time & t)
 {
-  if (waitig_queue_.empty())
+  checkTableNumber(num, static_cast< int >(tables_.size()));
+
+  if (waiting_queue_.empty())
   {
     return;
   }
-  std::string client = waitig_queue_.front();
-  waitig_queue_.pop();
+  std::string client = waiting_queue_.front();
+  waiting_queue_.pop();
 
   seatClientAtTable(client, num, t);
   addEvent(Event{t, 12, client, num, ""});
@@ -165,7 +179,7 @@ int telecom::ComputerClub::removeClient(const std::string & client, const Time &
     tables_[tableNum - 1].endSession(t, cost_);
     clients_.erase(it);
 
-    if (!waitig_queue_.empty())
+    if (!waiting_queue_.empty())
     {
       moveFromQueueToTable(tableNum, t);
     }
@@ -196,9 +210,9 @@ void telecom::ComputerClub::close()
     addEvent(Event{end_, 11, name, 0, ""});
   }
   clients_.clear();
-  while (!waitig_queue_.empty())
+  while (!waiting_queue_.empty())
   {
-    waitig_queue_.pop();
+    waiting_queue_.pop();
   }
 }
 

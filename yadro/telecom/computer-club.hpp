@@ -15,10 +15,10 @@ namespace telecom
   public:
     ComputerClub(int num_tables, Time start, Time end, int cost);
 
-    const Time & getStart() const;
-    const Time & getEnd() const;
-    const std::vector< Event > & getEvents() const;
-    const std::vector< Table > & getTables() const;
+    const Time & getStart() const noexcept;
+    const Time & getEnd() const noexcept;
+    const std::vector< Event > & getEvents() const noexcept;
+    const std::vector< Table > & getTables() const noexcept;
 
     void processEvent(const Event & ev);
     void close();
@@ -30,13 +30,13 @@ namespace telecom
     std::vector< Table > tables_;
     std::vector< Event > events_;
     std::unordered_map< std::string, int > clients_;
-    std::queue< std::string > waitig_queue_;
+    std::queue< std::string > waiting_queue_;
 
     void addEvent(const Event & ev);
-    bool isClientInClub(const std::string & client) const;
+    bool isClientInClub(const std::string & client) const noexcept;
     void addClient(const std::string & client);
     bool isTableFree(int num) const;
-    int getFreeTableNumber() const;
+    int getFreeTableNumber() const noexcept;
     void seatClientAtTable(const std::string & client, int num, const Time & t);
     void addToQueue(const std::string & client);
     void moveFromQueueToTable(int num, const Time & t);
