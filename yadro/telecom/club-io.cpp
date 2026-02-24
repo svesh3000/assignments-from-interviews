@@ -3,12 +3,15 @@
 #include <sstream>
 
 #include "event-handlers.hpp"
+#include "event-ids.hpp"
 
 namespace
 {
   using Handler = void (*)(telecom::ComputerClub &, const telecom::Event &);
-  const std::unordered_map< int, Handler > handlers = {{1, telecom::handleClientArrival},
-    {2, telecom::handleClientSit}, {3, telecom::handleClientWait}, {4, telecom::handleClientLeave}};
+  using EvID = telecom::EventID;
+  const std::unordered_map< EvID, Handler > handlers = {{EvID::CLIENT_ARRIVAL, telecom::handleClientArrival},
+    {EvID::CLIENT_SIT, telecom::handleClientSit}, {EvID::CLIENT_WAIT, telecom::handleClientWait},
+    {EvID::CLIENT_LEAVE, telecom::handleClientLeave}};
 
   bool parseEventLine(const std::string & line, telecom::Event & ev, std::string & errorLine);
 
@@ -18,8 +21,10 @@ namespace
   bool parseEventLine(const std::string & line, telecom::Event & ev, std::string & errorLine)
   {
     std::istringstream iss(line);
-    if (!(iss >> ev.time_ >> ev.id_ >> ev.name_))
+    int id;
+    if (!(iss >> ev.time_ >> id >> ev.name_))
     {
+      ev.id_ = static_cast< telecom::EventID >(id);
       errorLine = line;
       return false;
     }

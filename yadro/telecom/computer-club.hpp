@@ -22,22 +22,23 @@ namespace telecom
 
     size_t getNumTables() const noexcept;
     size_t getNumClientsInQueue() const noexcept;
+    int getClientTable(const std::string & client) const noexcept;
 
     void addEvent(const Event & ev);
 
-    bool isClientInClub(const std::string & client) const noexcept;
     void addClient(const std::string & client);
+    bool isClientInClub(const std::string & client) const noexcept;
+    int removeClient(const std::string & client, const Time & t);
 
     bool isTableFree(int num) const;
     int getFreeTableNumber() const noexcept;
-
     void seatClientAtTable(const std::string & client, int num, const Time & t);
-    void addToQueue(const std::string & client);
-    void moveFromQueueToTable(int num, const Time & t);
-    int removeClient(const std::string & client, const Time & t);
 
-    void processEvent(const Event & ev);
-    void close();
+    void addToQueue(const std::string & client);
+    bool isQueueEmpty() const noexcept;
+    std::string moveFromQueueToTable(int num, const Time & t);
+
+    std::vector< std::pair< std::string, int > > close();
 
   private:
     Time start_;

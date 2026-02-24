@@ -73,6 +73,12 @@ size_t telecom::ComputerClub::getNumClientsInQueue() const noexcept
   return waiting_queue_.size();
 }
 
+int telecom::ComputerClub::getClientTable(const std::string & client) const noexcept
+{
+  auto it = clients_.find(client);
+  return (it != clients_.end()) ? it->second : 0;
+}
+
 void telecom::ComputerClub::addEvent(const Event & ev)
 {
   events_.push_back(ev);
@@ -86,6 +92,23 @@ void telecom::ComputerClub::addClient(const std::string & client)
 bool telecom::ComputerClub::isClientInClub(const std::string & client) const noexcept
 {
   return clients_.find(client) != clients_.end();
+}
+
+int telecom::ComputerClub::removeClient(const std::string & client, const Time & t)
+{
+  auto it = clients_.find(client);
+  if (it == clients_.end())
+  {
+    return 0;
+  }
+
+  int tableNum = it->second;
+  if (tableNum != 0)
+  {
+    tables_[tableNum - 1].endSession(t, cost_);
+  }
+  clients_.erase(it);
+  return tableNum;
 }
 
 bool telecom::ComputerClub::isTableFree(int num) const
@@ -130,68 +153,48 @@ void telecom::ComputerClub::addToQueue(const std::string & client)
   waiting_queue_.push(client);
 }
 
-void telecom::ComputerClub::moveFromQueueToTable(int num, const Time & t)
+bool telecom::ComputerClub::isQueueEmpty() const noexcept
+{
+  return waiting_queue_.empty();
+}
+
+std::string telecom::ComputerClub::moveFromQueueToTable(int num, const Time & t)
 {
   checkTableNumber(num, static_cast< int >(tables_.size()));
 
   if (waiting_queue_.empty())
   {
-    return;
+    return "";
   }
   std::string client = waiting_queue_.front();
   waiting_queue_.pop();
 
   seatClientAtTable(client, num, t);
-  addEvent(Event{t, 12, client, num, ""});
+  return client;
 }
 
-int telecom::ComputerClub::removeClient(const std::string & client, const Time & t)
+std::vector< std::pair< std::string, int > > telecom::ComputerClub::close()
 {
-  auto it = clients_.find(client);
-  if (it == clients_.end())
-  {
-    return 0;
-  }
-
-  int tableNum = it->second;
-  if (tableNum != 0)
-  {
-    tables_[tableNum - 1].endSession(t, cost_);
-    clients_.erase(it);
-
-    if (!waiting_queue_.empty())
-    {
-      moveFromQueueToTable(tableNum, t);
-    }
-  }
-  else
-  {
-    clients_.erase(it);
-  }
-  return tableNum;
-}
-
-void telecom::ComputerClub::close()
-{
-  std::vector< std::string > remaining;
+  std::vector< std::pair< std::string, int > > result;
   for (const auto & p : clients_)
   {
-    remaining.push_back(p.first);
+    result.emplace_back(p.first, p.second);
   }
-  std::sort(remaining.begin(), remaining.end());
+  std::sort(result.begin(), result.end());
 
-  for (const auto & name : remaining)
+  for (const auto & [name, table] : result)
   {
-    int table = clients_[name];
     if (table != 0)
     {
       tables_[table - 1].endSession(end_, cost_);
     }
-    addEvent(Event{end_, 11, name, 0, ""});
   }
+
   clients_.clear();
   while (!waiting_queue_.empty())
   {
     waiting_queue_.pop();
   }
+
+  return result;
 }

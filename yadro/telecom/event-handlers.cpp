@@ -2,42 +2,41 @@
 
 #include <stdexcept>
 
+#include "event-errors.hpp"
+#include "event-ids.hpp"
+
 namespace
 {
-  void checkHasTableParam(const telecom::Event & event);
-  void checkHasErrParam(const telecom::Event & event);
-
-  void checkHasTableParam(const telecom::Event & event)
+  void checkNoTable(const telecom::Event & event)
   {
     if (event.table_ != 0)
     {
-      throw std::invalid_argument("Incorrect event data format");
+      throw std::invalid_argument("Incorrect event data format: unexpected table number");
     }
   }
-
-  void checkHasErrParam(const telecom::Event & event)
+  void checkNoError(const telecom::Event & event)
   {
     if (!event.err_.empty())
     {
-      throw std::invalid_argument("Incorrect event data format");
+      throw std::invalid_argument("Incorrect event data format: unexpected error message");
     }
   }
 }
 
 void telecom::handleClientArrival(ComputerClub & club, const Event & event)
 {
-  checkHasTableParam(event);
-  checkHasErrParam(event);
+  checkNoTable(event);
+  checkNoError(event);
 
   if (club.isClientInClub(event.name_))
   {
-    club.addEvent(Event{event.time_, 13, "", 0, "YouShallNotPass"});
+    club.addEvent(Event{event.time_, EventID::ERROR, "", 0, ErrMsg::YouShallNotPass});
     return;
   }
 
   if (event.time_ < club.getStart() || event.time_ >= club.getEnd())
   {
-    club.addEvent(Event{event.time_, 13, "", 0, "NotOpenYet"});
+    club.addEvent(Event{event.time_, EventID::ERROR, "", 0, ErrMsg::NotOpenYet});
     return;
   }
 
@@ -46,48 +45,52 @@ void telecom::handleClientArrival(ComputerClub & club, const Event & event)
 
 void telecom::handleClientSit(ComputerClub & club, const Event & event)
 {
-  checkHasErrParam(event);
+  checkNoError(event);
 
   if (!club.isClientInClub(event.name_))
   {
-    club.addEvent(Event{event.time_, 13, "", 0, "ClientUnknown"});
+    club.addEvent(Event{event.time_, EventID::ERROR, "", 0, ErrMsg::ClientUnknown});
     return;
   }
 
   if (!club.isTableFree(event.table_))
   {
-    club.addEvent(Event{event.time_, 13, "", 0, "PlaceIsBusy"});
+    club.addEvent(Event{event.time_, EventID::ERROR, "", 0, ErrMsg::PlaceIsBusy});
     return;
   }
 
+  int old_table = club.getClientTable(event.name_);
   club.seatClientAtTable(event.name_, event.table_, event.time_);
+  if (old_table != 0 && old_table != event.table_ && !club.isQueueEmpty())
+  {
+    std::string next = club.moveFromQueueToTable(old_table, event.time_);
+    if (!next.empty())
+    {
+      club.addEvent(Event{event.time_, EventID::CLIENT_SIT_FROM_QUEUE, next, old_table, ""});
+    }
+  }
 }
 
 void telecom::handleClientWait(ComputerClub & club, const Event & event)
 {
-  checkHasTableParam(event);
-  checkHasErrParam(event);
-
-  if (event.table_ != 0)
-  {
-    throw std::invalid_argument("Incorrect event data format in handleClientArrival");
-  }
+  checkNoTable(event);
+  checkNoError(event);
 
   if (!club.isClientInClub(event.name_))
   {
-    club.addEvent(Event{event.time_, 13, "", 0, "ClientUnknown"});
+    club.addEvent(Event{event.time_, EventID::ERROR, "", 0, ErrMsg::ClientUnknown});
     return;
   }
 
   if (club.getFreeTableNumber() != 0)
   {
-    club.addEvent(Event{event.time_, 13, "", 0, "ICanWaitNoLonger!"});
+    club.addEvent(Event{event.time_, EventID::ERROR, "", 0, ErrMsg::ICanWaitNoLonger});
     return;
   }
 
   if (club.getNumClientsInQueue() >= club.getNumTables())
   {
-    club.addEvent(Event{event.time_, 11, event.name_, 0, ""});
+    club.addEvent(Event{event.time_, EventID::CLIENT_FORCED_LEAVE, event.name_, 0, ""});
     club.removeClient(event.name_, event.time_);
     return;
   }
@@ -97,19 +100,22 @@ void telecom::handleClientWait(ComputerClub & club, const Event & event)
 
 void telecom::handleClientLeave(ComputerClub & club, const Event & event)
 {
-  checkHasTableParam(event);
-  checkHasErrParam(event);
-
-  if (event.table_ != 0)
-  {
-    throw std::invalid_argument("Incorrect event data format in handleClientArrival");
-  }
+  checkNoTable(event);
+  checkNoError(event);
 
   if (!club.isClientInClub(event.name_))
   {
-    club.addEvent(Event{event.time_, 13, "", 0, "ClientUnknown"});
+    club.addEvent(Event{event.time_, EventID::ERROR, "", 0, ErrMsg::ClientUnknown});
     return;
   }
 
-  club.removeClient(event.name_, event.time_);
+  int free_table = club.removeClient(event.name_, event.time_);
+  if (free_table != 0 && !club.isQueueEmpty())
+  {
+    std::string next = club.moveFromQueueToTable(free_table, event.time_);
+    if (!next.empty())
+    {
+      club.addEvent(Event{event.time_, EventID::CLIENT_SIT_FROM_QUEUE, next, free_table, ""});
+    }
+  }
 }
