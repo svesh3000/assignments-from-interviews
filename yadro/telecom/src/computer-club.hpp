@@ -24,6 +24,8 @@ namespace telecom
     size_t getNumClientsInQueue() const noexcept;
     int getClientTable(const std::string & client) const noexcept;
 
+    bool isWorkingTime(Time t) const;
+
     void addEvent(const Event & ev);
 
     void addClient(const std::string & client);

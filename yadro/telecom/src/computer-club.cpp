@@ -1,5 +1,6 @@
 #include "computer-club.hpp"
 
+#include <algorithm>
 #include <utility>
 #include <vector>
 
@@ -9,7 +10,7 @@
 namespace
 {
   std::vector< telecom::Table > createTables(int num_tables);
-  void checkTableNumber(int num);
+  void checkTableNumber(int num, int max_num);
 
   std::vector< telecom::Table > createTables(int num_tables)
   {
@@ -38,8 +39,8 @@ telecom::ComputerClub::ComputerClub(int num_tables, Time start, Time end, int co
   end_(end),
   cost_(cost),
   tables_(createTables(num_tables)),
-  clients_(),
   events_(),
+  clients_(),
   waiting_queue_()
 {}
 
@@ -77,6 +78,18 @@ int telecom::ComputerClub::getClientTable(const std::string & client) const noex
 {
   auto it = clients_.find(client);
   return (it != clients_.end()) ? it->second : 0;
+}
+
+bool telecom::ComputerClub::isWorkingTime(Time t) const
+{
+  if (start_ <= end_)
+  {
+    return t >= start_ && t < end_;
+  }
+  else
+  {
+    return t >= start_ || t < end_;
+  }
 }
 
 void telecom::ComputerClub::addEvent(const Event & ev)
@@ -119,7 +132,7 @@ bool telecom::ComputerClub::isTableFree(int num) const
 
 int telecom::ComputerClub::getFreeTableNumber() const noexcept
 {
-  for (int i = 0; i < tables_.size(); i++)
+  for (size_t i = 0; i < tables_.size(); i++)
   {
     if (isTableFree(i + 1))
     {

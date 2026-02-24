@@ -14,6 +14,8 @@ namespace
     {EvID::CLIENT_SIT, telecom::handleClientSit}, {EvID::CLIENT_WAIT, telecom::handleClientWait},
     {EvID::CLIENT_LEAVE, telecom::handleClientLeave}};
 
+  int normalizeTime(telecom::Time t, telecom::Time start, telecom::Time end);
+
   bool parseEventLine(const std::string & line, telecom::Event & ev, std::string & errorLine);
 
   void processSingleEvent(telecom::ComputerClub & club, const telecom::Event & ev);
@@ -21,12 +23,36 @@ namespace
   std::ostream & printEvent(const telecom::Event & event, std::ostream & out);
   std::ostream & printTable(const telecom::Table & table, std::ostream & out);
 
+  int normalizeTime(telecom::Time t, telecom::Time start, telecom::Time end)
+  {
+    int t_min = t.hours_ * 60 + t.minutes_;
+    int start_min = start.hours_ * 60 + start.minutes_;
+    int end_min = end.hours_ * 60 + end.minutes_;
+    if (start_min <= end_min)
+    {
+      return t_min;
+    }
+    else
+    {
+      if (t_min < start_min)
+      {
+        t_min += 24 * 60;
+      }
+      return t_min;
+    }
+  }
+
   bool parseEventLine(const std::string & line, telecom::Event & ev, std::string & errorLine)
   {
     std::istringstream iss(line);
-
     int id;
     if (!(iss >> ev.time_ >> id >> ev.name_))
+    {
+      errorLine = line;
+      return false;
+    }
+
+    if (id < 1 || id > 4)
     {
       errorLine = line;
       return false;
@@ -36,14 +62,29 @@ namespace
     iss >> std::ws;
     if (iss.peek() != EOF)
     {
-      if (!(iss >> ev.table_))
+      if (id == 2)
+      {
+        if (!(iss >> ev.table_) || ev.table_ < 1)
+        {
+          errorLine = line;
+          return false;
+        }
+        iss >> std::ws;
+        if (iss.peek() != EOF)
+        {
+          errorLine = line;
+          return false;
+        }
+      }
+      else
       {
         errorLine = line;
         return false;
       }
-
-      iss >> std::ws;
-      if (iss.peek() != EOF)
+    }
+    else
+    {
+      if (id == 2)
       {
         errorLine = line;
         return false;
@@ -137,6 +178,7 @@ std::pair< telecom::ComputerClub, std::string > telecom::processComputerClub(std
 
   ComputerClub club(num_tables, start, end, cost);
 
+  int prev_norm_time = -1;
   while (std::getline(in, line))
   {
     if (line.empty())
@@ -149,6 +191,19 @@ std::pair< telecom::ComputerClub, std::string > telecom::processComputerClub(std
     {
       return {ComputerClub(0, Time{0, 0}, Time{0, 0}, 0), err_line};
     }
+
+    int norm_time = normalizeTime(ev.time_, start, end);
+    if (prev_norm_time != -1 && norm_time < prev_norm_time)
+    {
+      return {ComputerClub(0, Time{0, 0}, Time{0, 0}, 0), line};
+    }
+    prev_norm_time = norm_time;
+
+    if (ev.id_ == EventID::CLIENT_SIT && ev.table_ < 1)
+    {
+      return {ComputerClub(0, Time{0, 0}, Time{0, 0}, 0), line};
+    }
+
     club.addEvent(ev);
     try
     {
@@ -156,7 +211,7 @@ std::pair< telecom::ComputerClub, std::string > telecom::processComputerClub(std
     }
     catch (...)
     {
-      return {ComputerClub(0, Time{0, 0}, Time{0, 0}, 0), err_line};
+      return {ComputerClub(0, Time{0, 0}, Time{0, 0}, 0), line};
     }
   }
 

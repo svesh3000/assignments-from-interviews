@@ -22,7 +22,7 @@ int main(int argc, char * argv[])
   try
   {
     std::pair< ComputerClub, std::string > club_with_err = processComputerClub(file);
-    if (!club_with_err.second.empty())
+    if (!club_with_err.second.empty() || club_with_err.first.getNumTables() == 0)
     {
       std::cout << club_with_err.second << "\n";
       return 1;

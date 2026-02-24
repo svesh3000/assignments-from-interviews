@@ -1,0 +1,10 @@
+3
+09:00 19:00
+10
+09:00 1 clientA
+09:01 1 clientB
+09:02 2 clientA 1
+09:03 2 clientB 2
+09:04 1 clientC
+09:05 3 clientC
+09:06 2 clientA 3

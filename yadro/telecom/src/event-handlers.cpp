@@ -34,7 +34,7 @@ void telecom::handleClientArrival(ComputerClub & club, const Event & event)
     return;
   }
 
-  if (event.time_ < club.getStart() || event.time_ >= club.getEnd())
+  if (!club.isWorkingTime(event.time_))
   {
     club.addEvent(Event{event.time_, EventID::ERROR, "", 0, ErrMsg::NotOpenYet});
     return;
@@ -75,6 +75,11 @@ void telecom::handleClientWait(ComputerClub & club, const Event & event)
 {
   checkNoTable(event);
   checkNoError(event);
+
+  if (club.getClientTable(event.name_) != 0)
+  {
+    return;
+  }
 
   if (!club.isClientInClub(event.name_))
   {

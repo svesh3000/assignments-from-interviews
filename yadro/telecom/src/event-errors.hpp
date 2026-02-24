@@ -3,7 +3,6 @@
 
 namespace telecom
 {
-
   namespace ErrMsg
   {
     constexpr const char * YouShallNotPass = "YouShallNotPass";
